@@ -11,13 +11,13 @@
       padding: 20px;
     }
 
-    /* General Styles */
+    
     h2 {
       text-align: center;
       margin-bottom: 20px;
     }
 
-    /* Contact Form Styles */
+    
     .form-container {
       max-width: 500px;
       margin: 0 auto 50px;
@@ -61,7 +61,7 @@
       font-size: 14px;
     }
 
-    /* To-Do List Styles */
+   
     .todo-container {
       max-width: 500px;
       margin: auto;
@@ -100,7 +100,7 @@
 </head>
 <body>
 
-  <!-- Contact Form Section -->
+  
   <div class="form-container">
     <h2>Contact Us</h2>
     <form id="contactForm">
@@ -119,7 +119,7 @@
     </form>
   </div>
 
-  <!-- To-Do List Section -->
+
   <div class="todo-container">
     <h2>My To-Do List</h2>
     <form id="todo-form">
@@ -130,7 +130,7 @@
   </div>
 
   <script>
-    // Contact Form Validation
+   
     document.getElementById("contactForm").addEventListener("submit", function (e) {
       e.preventDefault();
 
@@ -153,10 +153,10 @@
       errorMessage.textContent = "";
       alert("Form submitted successfully!");
 
-      this.reset(); // Clear form
+      this.reset(); 
     });
 
-    // To-Do List Functionality
+ 
     const todoForm = document.getElementById("todo-form");
     const taskInput = document.getElementById("task-input");
     const taskList = document.getElementById("task-list");
@@ -181,7 +181,7 @@
       li.appendChild(deleteBtn);
       taskList.appendChild(li);
 
-      taskInput.value = ""; // Clear input
+      taskInput.value = ""; 
     });
   </script>
 </body>
