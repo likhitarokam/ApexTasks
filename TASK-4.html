@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ApexPlanet Task-3</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header, nav, section {
+      padding: 20px;
+    }
+    nav {
+      background: #333;
+      color: white;
+      display: flex;
+      gap: 20px;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+    }
+    section {
+      display: none;
+    }
+    section.active {
+      display: block;
+    }
+
+    /* Portfolio Styles */
+    .projects-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .project-card {
+      flex: 1 1 200px;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+
+    /* Note App Styles */
+    .note-app input, .note-app textarea {
+      width: 70%;
+      padding: 10px;
+    }
+    .note-app button {
+      padding: 10px 15px;
+      margin-top: 10px;
+    }
+    .note {
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+      position: relative;
+      background: #fff;
+    }
+    .note button {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: red;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Product Styles */
+    .product-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .product-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .product {
+      border: 1px solid #ddd;
+      padding: 10px;
+      flex: 1 1 220px;
+      background: #f9f9f9;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Task-3</h1>
+    <nav>
+      <a href="#" onclick="showSection('portfolio')">Portfolio</a>
+      <a href="#" onclick="showSection('notes')">Notes</a>
+      <a href="#" onclick="showSection('products')">Product Page</a>
+    </nav>
+  </header>
+
+  <!-- Portfolio Section -->
+  <section id="portfolio" class="active">
+    <h2>About Me</h2>
+    <p>MCA student currently interning as a Web Developer at Apex Planet</p>
+
+    <h2>Projects</h2>
+    <div class="projects-grid">
+      <div class="project-card">
+        <h3>Note-Taking</h3>
+        <p>Take and store notes</p>
+      </div>
+      <div class="project-card">
+        <h3>Product Page</h3>
+        <p>Filter and sort items</p>
+      </div>
+    </div>
+
+    <h2>Contact</h2>
+    <p>Email: likhitarokam2004@gmail.com</p>
+  </section>
+
+  <!-- Note App Section -->
+  <section id="notes">
+    <h2>Note-Taking </h2>
+    <div class="note-app">
+      <input type="text" id="noteTitle" placeholder="Note Title"><br><br>
+      <textarea id="noteInput" placeholder="Write your note here..." rows="4"></textarea><br>
+      <button onclick="addNote()">Add Note</button>
+      <div id="notesList"></div>
+    </div>
+  </section>
+
+  <!-- Product Listing Section -->
+  <section id="products">
+    <h2>Products</h2>
+    <div class="product-controls">
+      <label>Category:
+        <select id="categoryFilter" onchange="filterProducts()">
+          <option value="">All</option>
+          <option value="Electronics">Electronics</option>
+          <option value="Books">Books</option>
+        </select>
+      </label>
+      <label>Sort by:
+        <select id="sortSelect" onchange="filterProducts()">
+          <option value="default">Default</option>
+          <option value="priceAsc">Price ↑</option>
+          <option value="priceDesc">Price ↓</option>
+          <option value="rating">Rating</option>
+        </select>
+      </label>
+      <button onclick="clearFilters()">Clear Filters</button>
+    </div>
+    <div class="product-grid" id="productGrid"></div>
+  </section>
+
+  <script>
+    // Navigation
+    function showSection(id) {
+      document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    // Note-Taking Logic
+    const notesList = document.getElementById('notesList');
+    const noteInput = document.getElementById('noteInput');
+    const noteTitle = document.getElementById('noteTitle');
+
+    function loadNotes() {
+      const notes = JSON.parse(localStorage.getItem('notes')) || [];
+      notesList.innerHTML = '';
+      notes.forEach((note, index) => {
+        const div = document.createElement('div');
+        div.className = 'note';
+        div.innerHTML = `
+          <strong>${note.title || 'Untitled'}</strong><br>
+          <small>${note.timestamp}</small><br><br>
+          ${note.content}
+          <button onclick="deleteNote(${index})">X</button>
+        `;
+        notesList.appendChild(div);
+      });
+    }
+
+    function addNote() {
+      const title = noteTitle.value.trim();
+      const content = noteInput.value.trim();
+      if (!content) return;
+
+      const notes = JSON.parse(localStorage.getItem('notes')) || [];
+      const newNote = {
+        title: title || 'Untitled',
+        content,
+        timestamp: new Date().toLocaleString()
+      };
+
+      notes.push(newNote);
+      localStorage.setItem('notes', JSON.stringify(notes));
+
+      noteTitle.value = '';
+      noteInput.value = '';
+      loadNotes();
+    }
+
+    function deleteNote(index) {
+      const notes = JSON.parse(localStorage.getItem('notes')) || [];
+      notes.splice(index, 1);
+      localStorage.setItem('notes', JSON.stringify(notes));
+      loadNotes();
+    }
+
+    loadNotes();
+
+    // Product Listing Logic
+    const products = [
+      { name: 'Phone', category: 'Electronics', price: 24900, rating: 4.5 },
+      { name: 'Laptop', category: 'Electronics', price: 66400, rating: 4.7 },
+      { name: 'Book A', category: 'Books', price: 1245, rating: 4.2 },
+      { name: 'Book B', category: 'Books', price: 2075, rating: 3.9 },
+    ];
+
+    function filterProducts() {
+      const category = document.getElementById('categoryFilter').value;
+      const sort = document.getElementById('sortSelect').value;
+
+      let filtered = products.filter(p => !category || p.category === category);
+
+      if (sort === 'priceAsc') filtered.sort((a, b) => a.price - b.price);
+      else if (sort === 'priceDesc') filtered.sort((a, b) => b.price - a.price);
+      else if (sort === 'rating') filtered.sort((a, b) => b.rating - a.rating);
+
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = '';
+      filtered.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'product';
+        div.innerHTML = `
+          <h3>${p.name}</h3>
+          <p><strong>Category:</strong> ${p.category}</p>
+          <p><strong>Price:</strong> ₹${p.price}</p>
+          <p><strong>Rating:</strong> ${p.rating} ★</p>
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    function clearFilters() {
+      document.getElementById('categoryFilter').value = '';
+      document.getElementById('sortSelect').value = 'default';
+      filterProducts();
+    }
+
+    filterProducts();
+  </script>
+</body>
+</html>
