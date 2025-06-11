@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task-5</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f8f9fa;
+      color: #333;
+    }
+    header, nav, section, footer {
+      padding: 1em;
+    }
+    header {
+      background: #047bd5;
+      color: white;
+      text-align: center;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 2em;
+      background: #ddd;
+    }
+    nav button {
+      padding: 0.5em 1em;
+      background: #047bd5;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .product, .wishlist-item, .cart-item, .order-item {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 1em;
+      margin: 1em;
+      background: white;
+      width: 250px;
+    }
+    .hidden {
+      display: none;
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    input {
+      padding: 0.5em;
+      margin: 0.5em 0;
+      width: 100%;
+    }
+    .larger-btn {
+      font-size: 1.1em;
+      padding: 0.7em;
+      margin: 0.5em 0;
+    }
+    .add-btn {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      margin: 0.3em 0;
+    }
+    .wishlist-btn {
+      background-color: #ffc107;
+      color: black;
+      border: none;
+    }
+    .remove-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+    }
+    .show-password {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MyStyleCart</h1>
+    <p>Your one-stop shop for gadgets and accessories!</p>
+  </header>
+
+  <nav>
+    <button onclick="showPage('home')">Home</button>
+    <button onclick="showPage('wishlist')">Wishlist</button>
+    <button onclick="showPage('cart')">Cart</button>
+    <button onclick="showPage('orders')">Orders</button>
+    <button onclick="showPage('auth')" id="auth-btn">Login/Register</button>
+  </nav>
+
+  <section id="auth" class="hidden">
+    <h2>Register</h2>
+    <input type="email" id="regEmail" placeholder="Email" required>
+    <input type="password" id="regPass" placeholder="Password" required>
+    <div class="show-password">
+      <input type="checkbox" onclick="togglePassword('regPass')">Show Password
+    </div>
+    <button onclick="registerUser()">Register</button>
+
+    <h2>Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email" required>
+    <input type="password" id="loginPass" placeholder="Password" required>
+    <div class="show-password">
+      <input type="checkbox" onclick="togglePassword('loginPass')">Show Password
+    </div>
+    <button onclick="loginUser()">Login</button>
+  </section>
+
+  <section id="home">
+    <div class="container" id="products"></div>
+  </section>
+
+  <section id="wishlist" class="hidden">
+    <h2>Your Wishlist</h2>
+    <div id="wishlistItems" class="container"></div>
+  </section>
+
+  <section id="cart" class="hidden">
+    <h2>Your Cart</h2>
+    <div id="cartItems" class="container"></div>
+    <button onclick="confirmOrder()" class="larger-btn" id="confirmOrderBtn">Confirm Order</button>
+    <div id="orderDetails" class="hidden">
+      <input type="text" id="address" placeholder="Address">
+      <input type="tel" id="phone" placeholder="Phone Number">
+      <button onclick="placeOrder()">Place Order</button>
+    </div>
+  </section>
+
+  <section id="orders" class="hidden">
+    <h2>Order History</h2>
+    <div id="orderHistory" class="container"></div>
+  </section>
+
+  <script>
+    const products = [
+      { id: 1, name: "Wireless Headphones", price: 2999 },
+      { id: 2, name: "Smartwatch", price: 4999 },
+      { id: 3, name: "Bluetooth Speaker", price: 1999 },
+      { id: 4, name: "Phone Stand", price: 499 },
+      { id: 5, name: "Laptop Sleeve", price: 999 },
+      { id: 6, name: "USB Hub", price: 699 },
+      { id: 7, name: "Fitness Tracker", price: 3499 },
+      { id: 8, name: "Wireless Mouse", price: 799 },
+      { id: 9, name: "Keyboard", price: 1499 },
+      { id: 10, name: "Mobile Charger", price: 899 }
+    ];
+
+    let user = null;
+    let wishlist = [], cart = [], orders = [], redirectAfterLogin = null;
+
+    function showPage(page) {
+      document.querySelectorAll("section").forEach(sec => sec.classList.add("hidden"));
+      document.getElementById(page).classList.remove("hidden");
+      if (page === 'home') renderProducts();
+      if (page === 'wishlist') renderWishlist();
+      if (page === 'cart') renderCart();
+      if (page === 'orders') renderOrders();
+    }
+
+    function renderProducts() {
+      const div = document.getElementById('products');
+      div.innerHTML = '';
+      products.forEach(p => {
+        div.innerHTML += `
+          <div class="product">
+            <h3>${p.name}</h3>
+            <p>₹${p.price}</p>
+            <button onclick='addToCart(${p.id})' class="larger-btn add-btn">Add to Cart</button>
+            <button onclick='addToWishlist(${p.id})' class="larger-btn wishlist-btn">Add to Wishlist</button>
+          </div>
+        `;
+      });
+    }
+
+    function renderWishlist() {
+      const div = document.getElementById('wishlistItems');
+      div.innerHTML = '';
+      wishlist.forEach(id => {
+        const p = products.find(x => x.id === id);
+        div.innerHTML += `
+          <div class="wishlist-item">
+            <h3>${p.name}</h3>
+            <p>₹${p.price}</p>
+            <button onclick='addToCart(${p.id})' class="larger-btn add-btn">Add to Cart</button>
+            <button onclick='removeFromWishlist(${p.id})' class="larger-btn remove-btn">Remove</button>
+          </div>
+        `;
+      });
+    }
+
+    function renderCart() {
+      const div = document.getElementById('cartItems');
+      div.innerHTML = '';
+      cart.forEach(id => {
+        const p = products.find(x => x.id === id);
+        div.innerHTML += `
+          <div class="cart-item">
+            <h3>${p.name}</h3>
+            <p>₹${p.price}</p>
+            <button onclick='removeFromCart(${p.id})' class="larger-btn remove-btn">Remove</button>
+          </div>
+        `;
+      });
+    }
+
+    function renderOrders() {
+      const div = document.getElementById('orderHistory');
+      div.innerHTML = '';
+      orders.forEach(o => {
+        div.innerHTML += `
+          <div class="order-item">
+            <h3>Total: ₹${o.total}</h3>
+            <p>Address: ${o.address}</p>
+            <p>Phone: ${o.phone}</p>
+          </div>
+        `;
+      });
+    }
+
+    function addToCart(id) {
+      if (!cart.includes(id)) cart.push(id);
+      alert("Added to cart");
+    }
+
+    function addToWishlist(id) {
+      if (!wishlist.includes(id)) wishlist.push(id);
+      alert("Added to wishlist");
+    }
+
+    function removeFromWishlist(id) {
+      wishlist = wishlist.filter(x => x !== id);
+      renderWishlist();
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(x => x !== id);
+      renderCart();
+    }
+
+    function confirmOrder() {
+      if (!user) {
+        redirectAfterLogin = 'cart';
+        showPage('auth');
+        return;
+      }
+      document.getElementById('orderDetails').classList.remove('hidden');
+    }
+
+    function placeOrder() {
+      const addr = document.getElementById('address').value;
+      const phone = document.getElementById('phone').value;
+      const total = cart.reduce((acc, id) => acc + products.find(p => p.id === id).price, 0);
+      orders.push({ address: addr, phone: phone, total });
+      cart = [];
+      document.getElementById('orderDetails').classList.add('hidden');
+      alert("Order placed successfully!");
+      showPage('orders');
+    }
+
+    function registerUser() {
+      const email = document.getElementById('regEmail').value;
+      const pass = document.getElementById('regPass').value;
+      if (!email.includes('@') || pass.length < 6) return alert("Invalid input");
+      localStorage.setItem('user', JSON.stringify({ email, pass }));
+      document.getElementById('regEmail').value = '';
+      document.getElementById('regPass').value = '';
+      alert("Registered successfully");
+    }
+
+    function loginUser() {
+      const email = document.getElementById('loginEmail').value;
+      const pass = document.getElementById('loginPass').value;
+      const stored = JSON.parse(localStorage.getItem('user'));
+      if (!stored || stored.email !== email || stored.pass !== pass) return alert("Invalid login");
+      user = stored;
+      document.getElementById('loginEmail').value = '';
+      document.getElementById('loginPass').value = '';
+      document.getElementById('auth-btn').innerText = 'Logout';
+      document.getElementById('auth-btn').onclick = logout;
+      if (redirectAfterLogin === 'cart') {
+        redirectAfterLogin = null;
+        showPage('cart');
+        confirmOrder();
+      } else {
+        showPage('home');
+      }
+    }
+
+    function logout() {
+      user = null;
+      document.getElementById('auth-btn').innerText = 'Login/Register';
+      document.getElementById('auth-btn').onclick = () => showPage('auth');
+      showPage('home');
+    }
+
+    function togglePassword(id) {
+      const field = document.getElementById(id);
+      field.type = field.type === 'password' ? 'text' : 'password';
+    }
+
+    showPage('home');
+  </script>
+</body>
+      </html>
